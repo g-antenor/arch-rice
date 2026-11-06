@@ -1,0 +1,1 @@
+-- Add personal autocommands here. Theme synchronization is initialized in init.lua.

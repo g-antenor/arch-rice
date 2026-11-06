@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+rice_runtime="$HOME/.local/lib/dark-mountain/apps-runtime/usr"
+rice_app="${0##*/}"
+export PATH="$HOME/.local/bin:$rice_runtime/bin:$PATH"
+export LD_LIBRARY_PATH="$rice_runtime/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export XDG_DATA_DIRS="$rice_runtime/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+export TZ=America/Sao_Paulo
+export EDITOR=nvim VISUAL=nvim
+export FZF_DEFAULT_OPTS="--border=rounded --color=bg:-1,fg:7,bg+:8,fg+:15,hl:4,hl+:4,info:7,prompt:4,pointer:4,marker:4 --prompt='› ' ${FZF_DEFAULT_OPTS:-}"
+case "$rice_app" in
+    magick|convert|identify)
+        for rice_im in "$rice_runtime"/lib/ImageMagick-*; do
+            export MAGICK_CODER_MODULE_PATH="$rice_im/modules-Q16HDRI/coders"
+            export MAGICK_FILTER_MODULE_PATH="$rice_im/modules-Q16HDRI/filters"
+            export MAGICK_CONFIGURE_PATH="$rice_im/config-Q16HDRI"
+        done ;;
+    nvim) export VIMRUNTIME="$rice_runtime/share/nvim/runtime" ;;
+    cc) rice_app=gcc ;;
+    c++) rice_app=g++ ;;
+    docker|lazydocker) if [[ -z "${DOCKER_HOST:-}" && -S "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/docker.sock" ]]; then export DOCKER_HOST="unix://${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/docker.sock"; fi ;;
+esac
+exec "$rice_runtime/bin/$rice_app" "$@"

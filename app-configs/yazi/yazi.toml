@@ -1,0 +1,17 @@
+[mgr]
+ratio = [1, 3, 4]
+sort_by = "natural"
+sort_dir_first = true
+[opener]
+image = [{ run = 'rice-image %s', block = true, desc = "Imagem no terminal" }]
+edit = [{ run = 'nvim %s', block = true, desc = "LazyVim" }]
+pdf = [{ run = 'rice-pdf %s', block = true, desc = "PDF no terminal" }]
+video = [{ run = 'rice-video %s', block = true, desc = "Vídeo no terminal" }]
+open = [{ run = 'xdg-open %s1', orphan = true, desc = "Aplicativo padrão" }]
+[open]
+prepend_rules = [
+ { mime = "image/*", use = "image" },
+ { mime = "application/pdf", use = "pdf" },
+ { mime = "video/*", use = "video" },
+ { mime = "text/*", use = "edit" },
+]

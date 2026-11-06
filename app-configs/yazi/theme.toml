@@ -1,0 +1,48 @@
+[mgr]
+cwd = { fg = "blue" }
+find_keyword = { fg = "yellow", bold = true }
+find_position = { fg = "magenta", bg = "reset" }
+marker_copied = { fg = "green", bg = "green" }
+marker_cut = { fg = "red", bg = "red" }
+marker_marked = { fg = "blue", bg = "blue" }
+border_symbol = "│"
+border_style = { fg = "black" }
+[tabs]
+active = { fg = "black", bg = "blue", bold = true }
+inactive = { fg = "gray", bg = "reset" }
+[status]
+overall = { bg = "reset" }
+sep_left = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+[input]
+border = { fg = "blue" }
+title = { fg = "white" }
+value = { fg = "white" }
+selected = { reversed = true }
+[pick]
+border = { fg = "blue" }
+active = { fg = "blue", bold = true }
+inactive = { fg = "white" }
+[help]
+on = { fg = "blue" }
+run = { fg = "white" }
+desc = { fg = "gray" }
+hovered = { reversed = true }
+footer = { fg = "gray", bg = "reset" }
+
+[icon]
+dirs = []
+files = []
+exts = []
+conds = [
+ { if = "dir & hovered", text = "", fg = "blue" },
+ { if = "dir", text = "", fg = "blue" },
+ { if = "exec", text = "", fg = "blue" },
+ { if = "!dir", text = "", fg = "white" },
+]
+
+[indicator]
+parent = { fg = "blue", bold = true }
+current = { fg = "white", bg = "darkgray", bold = true }
+preview = { underline = true }
+padding = { open = " ", close = " " }

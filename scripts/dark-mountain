@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export TZ=America/Sao_Paulo
+runtime="$HOME/.local/lib/dark-mountain/runtime/usr"
+if command -v quickshell >/dev/null 2>&1; then
+    qs_bin=$(command -v quickshell)
+elif [[ -x "$runtime/bin/quickshell" ]]; then
+    qs_bin="$runtime/bin/quickshell"
+    export LD_LIBRARY_PATH="$runtime/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export QML_IMPORT_PATH="$runtime/lib/qt6/qml${QML_IMPORT_PATH:+:$QML_IMPORT_PATH}"
+else
+    echo 'Quickshell ausente. Instale com: sudo pacman -S quickshell' >&2
+    exit 1
+fi
+config="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/dark-mountain"
+state="${XDG_STATE_HOME:-$HOME/.local/state}/dark-mountain"
+control_script="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/control.py"
+prepare_notifications() {
+    mkdir -p "$state"
+    if systemctl --user is-active --quiet dunst.service; then
+        touch "$state/restore-dunst"
+        systemctl --user stop dunst.service
+    fi
+}
+wait_for_stop() {
+    for attempt in {1..40}; do
+        if ! "$qs_bin" list -p "$config" 2>/dev/null | rg -q "Process ID:"; then return 0; fi
+        sleep 0.1
+    done
+    echo 'A instância anterior não encerrou; tente novamente.' >&2
+    return 1
+}
+case "${1:-start}" in
+    start) python3 "$control_script" init; prepare_notifications; exec "$qs_bin" -p "$config" --no-duplicate --daemonize ;;
+    preview) python3 "$control_script" init; prepare_notifications; exec "$qs_bin" -p "$config" --no-duplicate ;;
+    stop)
+        python3 "$control_script" restore-focus
+        "$qs_bin" kill -p "$config" || true
+        wait_for_stop
+        if [[ -e "$state/restore-dunst" ]]; then systemctl --user start dunst.service; fi ;;
+
+    restart)
+        "$qs_bin" kill -p "$config" || true
+        wait_for_stop
+        python3 "$control_script" init
+        prepare_notifications
+        exec "$qs_bin" -p "$config" --no-duplicate --daemonize ;;
+
+    theme) if [[ $# -gt 1 ]]; then exec python3 "$control_script" theme "$2"; else exec python3 "$control_script" next-theme; fi ;;
+    wallpaper) if [[ $# -gt 1 ]]; then exec python3 "$control_script" wallpaper "$2"; else exec python3 "$control_script" next-wallpaper; fi ;;
+    focus) exec python3 "$control_script" focus ;;
+    search) exec python3 "$control_script" search-menu ;;
+    power) exec python3 "$control_script" power-menu ;;
+    logout) exec python3 "$control_script" logout-menu ;;
+    status) exec "$qs_bin" list -p "$config" ;;
+    ipc) shift; exec "$qs_bin" ipc -p "$config" "$@" ;;
+    *) echo 'Uso: dark-mountain {start|stop|restart|preview|status|ipc|theme [mountain|mono|red]|wallpaper|focus|power|logout}' >&2; exit 2 ;;
+esac

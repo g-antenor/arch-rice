@@ -1,0 +1,11 @@
+gui:
+  border: rounded
+  theme:
+    activeBorderColor: [blue, bold]
+    inactiveBorderColor: [black]
+    optionsTextColor: [blue]
+    selectedLineBgColor: [black]
+  showBottomLine: true
+  wrapMainPanel: true
+commandTemplates:
+  dockerCompose: docker compose
